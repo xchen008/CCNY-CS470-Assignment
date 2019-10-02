@@ -35,16 +35,20 @@ HW_quantize(ImagePtr I1, int levels, bool dither, ImagePtr I2)
 		}
 	}
 	else {
-		int temp1, temp2, temp3;
+		int randNum, altInput, alternating, altX, altY;					//
 		for (int ch = 0; IP_getChannel(I1, ch, p1, type); ch++) {	// get input  pointer for channel ch
 			IP_getChannel(I2, ch, p2, type);						// get output pointer for channel ch
 			for (i = 0; i < total; i++) {
-					temp1 = ((double)rand() / RAND_MAX) * bias;
-					temp3 = rand() % 2;
-					temp3 == 0 ? temp2 = *p1++ + temp1 : temp2 = *p1++ - temp1;
-					temp2 <= 0 ? 
-						*p2++=lut[0] : temp2 >= 255 ?
-						*p2++ = lut[255] : *p2++ = lut[temp2];
+					randNum = ((double)rand() / RAND_MAX) * bias;
+
+					//Randomizing between between adding and subtracting
+					alternating = rand() % 2;
+					alternating == 0 ?
+						altInput = *p1++ + randNum : altInput = *p1++ - randNum;
+
+					altInput <= 0 ?
+						*p2++=lut[0] : altInput >= 255 ?
+						*p2++ = lut[255] : *p2++ = lut[altInput];
 			}
 		}
 	}
