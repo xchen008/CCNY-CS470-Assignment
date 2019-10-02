@@ -14,6 +14,8 @@ HW_gammaCorrect(ImagePtr I1, double gamma, ImagePtr I2)
 	double lut[MXGRAY];
 	int i;
 
+	// Populating the look up table
+	// Formula for gamma correction
 	for (i = 0; i < MXGRAY; i++) {
 		lut[i] = (pow((i/255.0), (1/gamma)) * 255.0);
 	}
