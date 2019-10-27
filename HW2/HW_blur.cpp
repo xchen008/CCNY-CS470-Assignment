@@ -15,11 +15,6 @@ void
 HW_blur(ImagePtr I1, int filterW, int filterH, ImagePtr I2)
 {
 	IP_copyImageHeader(I1, I2);
-	
-	// Getting original width of image
-	int width = I1->width();
-	int height = I1->height();
-	int total = width * height;
 
 	// Retrieving pointer to images
 	ChannelPtr<uchar> p1, p2;
@@ -27,8 +22,13 @@ HW_blur(ImagePtr I1, int filterW, int filterH, ImagePtr I2)
 	int ch = 0;
 	IP_getChannel(I1, ch, p1, type);
 	IP_getChannel(I2, ch, p2, type);
+	
+	// Getting original width of image
+	int width = I1->width();
+	int height = I1->height();
+	int total = width * height;
 
-	// Filters can only be odd
+	// Forcing Filter to be odd
 	int filterW2, filterH2;
 
 	if (filterW % 2 == 0)	filterW2 = filterW + 1;
@@ -51,9 +51,18 @@ HW_blur(ImagePtr I1, int filterW, int filterH, ImagePtr I2)
 	int fullPaddingH = (paddingH) * 2;
 
 	// Allocating memory to use as buffer. 
-	// Size is the width plus all the padding on bot sides
-	int *allocMemory = new int[width + fullPaddingW]; 
+	// Size depends on which part of the dimensions of the image is larger
+	int memorySize;
+
+	if (width + fullPaddingW > height + fullPaddingH)
+		memorySize = width + fullPaddingW;
+	else
+		memorySize = height + fullPaddingH;
+
+	int *allocMemory = new int[memorySize]; 
 	int i, j;
+
+	/* FIRST pass through the image */
 
 	// Determining which row to work on
 	for (j = 0; j < height; j++) {
@@ -82,40 +91,36 @@ HW_blur(ImagePtr I1, int filterW, int filterH, ImagePtr I2)
 			*(p2 + j * width + i) = *(allocMemory + paddingW + i);
 	}
 
+	/* SECOND pass through the image */
+
+	// Determining which column to work on
+	for (j = 0; j < width; j++) {
+		// Padding the top side of image to be the same as the first pixel of original image
+		for (i = 0; i < paddingH; i++)
+			*(allocMemory + i) = *(p2 + j);
+
+		// Copying the original image into buffer
+		// Offsetting image by the padding
+		for (i = paddingH; i < height + (paddingH); i++)
+			*(allocMemory + i) = *(p2 + ((i - paddingH)*width) + j);
+
+		// Padding the bottom side of image to be the same as the last pixel of original image
+		for (i = height + (paddingH); i < height + fullPaddingH; i++)
+			*(allocMemory + i) = *(p2 + ((height-1)*width) + j); 
+
+		// Start the blurring process
+		for (i = paddingH; i < height + (paddingH); i++) {
+			int count = 0;
+			for (int k = i - paddingH; k < i + paddingH + 1; k++) 
+				count += *(allocMemory + k); 
+			*(allocMemory + i) = count / filterH2;
+		}
+
+		// Copying data from buffer to output image
+		for (i = 0; i < height; i++)
+			*(p2 + i*width + j) = *(allocMemory + paddingH + i);
+	}
+
 	delete allocMemory;
-
-
-	// THIS PART OF THE CODE BROKE THE WIDTH NO CLUE
-	// allocating memory to use as buffer
-	//int *allocMemory2 = new int[newHeight]; // new int[width + fullPaddingW];
-
-	//for (j = 0; j < width; j++) {
-	//	// padding the left side of image to be the same as the first pixel of original image
-	//	for (i = 0; i < paddingH; i++)
-	//		*(allocMemory2 + i) = *(p1 + j * height);
-
-	//	// copying the original image into buffer
-	//	// offsetting image by the padding
-	//	for (i = paddingH; i < height + (paddingH); i++)
-	//		*(allocMemory2 + i) = *(p1 + (j*height) + i - paddingH);
-
-	//	// padding the right side of image to be the same as the last pixel of original image
-	//	for (i = height + (paddingH); i < fullPaddingH; i++)
-	//		*(allocMemory2 + i) = *(p1 + (j*height) + height - 1);
-
-	//	// start the blurring process
-	//	for (i = paddingH; i < height + (paddingH); i++) {
-	//		int count = 0;
-	//		for (int k = i - paddingH; k < i + paddingH; k++)
-	//			count += *(allocMemory2 + k);
-	//		*(allocMemory2 + i) = count / filterH;
-	//	}
-
-	//	// gcopying data from buffer to output image
-	//	for (i = 0; i < height; i++)
-	//		*(p2 + j * height + i) = *(allocMemory2 + paddingH + i);  //*p1++; 
-	//}
-
-	//delete allocMemory2;
 
 }
