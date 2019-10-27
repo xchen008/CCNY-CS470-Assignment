@@ -82,7 +82,8 @@ HW_blur(ImagePtr I1, int filterW, int filterH, ImagePtr I2)
 		// Start the blurring process
 		for (i = paddingW; i < width + (paddingW); i++) {
 			int count = 0;
-			for (int k = i - paddingW; k < i + paddingW + 1; k++) { count += *(allocMemory + k); }
+			for (int k = i - paddingW; k < i + paddingW + 1; k++)
+				count += *(allocMemory + k); 
 			*(allocMemory + i) = count / filterW2;
 		}
 
