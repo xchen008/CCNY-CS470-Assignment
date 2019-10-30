@@ -102,8 +102,8 @@ int *initializeErrorLUT(int, int);
            for(i = 0, j = rowPadding; i < w; i++, j++)
                 {buffer[((bufferind % numOfRows) * rowWidthPlusPadding) + j] = p1[i];}
             
-           bufferind++; p1 += w;
-         }
+           p1 += w;
+         }bufferind++; 
          
 
        /* Set pixel traversal direction;
