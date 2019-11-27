@@ -1,0 +1,14 @@
+Question 5 answer:
+
+
+5a) Input is an impulse function, so the output is going to be constant of 1/255.
+
+5b) When the impulse function got spread out, it becomes a box filter, which will become a sinc function. The magnitude graph looks different than the sinc function because it starts at zero but then when it cycles back, we will have a sinc function. 
+
+5c) When the box filter got bigger, we will have a narrower sinc function because as the input is getting bigger in space, the frequency decrease. 
+
+5d) If the input is constant, the frequency will be the impulse. 
+
+5f) The output looks the same as 5b, but the magnitude is 10 times bigger. 
+
+5g) The magnitude looks the same as 5b, but the phase is now a lot faster
